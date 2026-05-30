@@ -166,7 +166,7 @@ input[type=number]{-moz-appearance:textfield;}
 
 /* data toolbar */
 .data-toolbar{position:relative;display:flex;align-items:center;}
-.data-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(245,230,160,0.25);border-radius:3px;color:rgba(245,230,160,0.7);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;position:relative;top:-2px;right:10px;}
+.data-btn{background:rgba(255,255,255,0.08);border:1px solid rgba(245,230,160,0.25);border-radius:3px;color:rgba(245,230,160,0.7);font-family:'Cinzel',serif;font-size:9px;letter-spacing:0.12em;padding:5px 10px;cursor:pointer;display:flex;align-items:center;gap:5px;transition:all 0.15s;position:relative;top:-2px;right:10px;margin-left:10px;}
 .data-btn:hover{background:rgba(255,255,255,0.14);border-color:rgba(245,230,160,0.5);color:var(--gold-light);}
 .data-btn svg{opacity:0.7;}
 .data-dropdown{position:absolute;top:calc(100% + 6px);right:0;background:var(--ink);border:1px solid rgba(245,230,160,0.2);border-radius:3px;min-width:160px;box-shadow:0 6px 20px rgba(0,0,0,0.5);z-index:100;display:none;overflow:hidden;}
@@ -179,7 +179,7 @@ input[type=number]{-moz-appearance:textfield;}
 @page{margin:0.4in;}
 @media print {
   *{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important;}
-  body{background:#2a1f14;padding:0;margin:0;}
+  body{padding:0;margin:0;}
   .sheet{box-shadow:none;border-radius:0;max-width:100%;width:100%;}
   .data-toolbar,.save-indicator{display:none!important;}
   .sheet::before{display:none;}
@@ -194,7 +194,6 @@ input[type=number]{-moz-appearance:textfield;}
     <div>
       <div style="display:flex;align-items:baseline;gap:12px;">
         <div class="header-title">TERRA GEMINUS</div>
-        <span class="save-indicator" id="save-indicator"></span>
         <div class="data-toolbar" id="data-toolbar">
         <button class="data-btn" onclick="toggleDropdown(event)" title="Import / Export">
           <svg width="11" height="11" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1v9M4 6l4 4 4-4M2 13h12" stroke="currentColor" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -216,6 +215,7 @@ input[type=number]{-moz-appearance:textfield;}
         </div>
       </div>
       <input type="file" id="import-file" accept=".json" style="display:none" onchange="handleImport(event)">
+        <span class="save-indicator" id="save-indicator"></span>
       </div>
       <div class="header-sub">Hunter Character Record</div>
     </div>
@@ -826,6 +826,7 @@ const TIERS=['Diamond','Emerald','Sapphire','Amethyst','Carnelian'];
 const TIER_ABBR=['DIA','EME','SAP','AME','CAR'];
 const TIER_CLASS=['active-diamond','active-emerald','active-sapphire','active-amethyst','active-carnelian'];
 const GEM_CLASSES=['gem-diamond','gem-emerald','gem-sapphire','gem-amethyst','gem-carnelian'];
+const TIER_BG=['#0d1820','#0d1a12','#0d1524','#150d20','#1f0a05'];
 let currentTier=0;
 const sv={str:10,dex:10,con:10,int:10,wis:10,cha:10};
 
@@ -953,13 +954,16 @@ function updateSphereGem(i){
   dot.classList.add(idx>=0?GEM_CLASSES[idx]:'gem-empty');
 }
 
-function cycleTier(){
-  currentTier=(currentTier+1)%TIERS.length;
+function applyTier(idx){
+  currentTier=idx;
   const b=document.getElementById('gem-badge');
-  b.className='tier-gem '+TIER_CLASS[currentTier];
-  b.textContent=TIER_ABBR[currentTier];
-  document.getElementById('tier-label').textContent=TIERS[currentTier];
+  b.className='tier-gem '+TIER_CLASS[idx];
+  b.textContent=TIER_ABBR[idx];
+  document.getElementById('tier-label').textContent=TIERS[idx];
+  document.body.style.background=TIER_BG[idx];
 }
+
+function cycleTier(){applyTier((currentTier+1)%TIERS.length);scheduleSave();}
 
 function toggleDeath(el,type){el.classList.toggle(type);}
 function autoResize(el){el.style.height='auto';el.style.height=el.scrollHeight+'px';}
@@ -1020,13 +1024,7 @@ function gatherData() {
 function applyData(data) {
   if (!data) return;
 
-  if (data.currentTier !== undefined) {
-    currentTier = data.currentTier;
-    const b = document.getElementById('gem-badge');
-    b.className = 'tier-gem ' + TIER_CLASS[currentTier];
-    b.textContent = TIER_ABBR[currentTier];
-    document.getElementById('tier-label').textContent = TIERS[currentTier];
-  }
+  if (data.currentTier !== undefined) applyTier(data.currentTier);
 
   if (data.identity) {
     const els = document.querySelectorAll('.identity-row .field-input');
@@ -1136,8 +1134,6 @@ function scheduleSave() {
   clearTimeout(saveTimer);
   saveTimer = setTimeout(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(gatherData()));
-    const ind = document.getElementById('save-indicator');
-    if (ind) { ind.textContent = 'SAVED'; setTimeout(() => { ind.textContent = ''; }, 1800); }
   }, 600);
 }
 
@@ -1186,7 +1182,7 @@ function handleImport(e) {
       applyData(JSON.parse(ev.target.result));
       localStorage.setItem(STORAGE_KEY, ev.target.result);
       const ind = document.getElementById('save-indicator');
-      if (ind) { ind.textContent = 'IMPORTED'; setTimeout(() => { ind.textContent = ''; }, 2000); }
+      if (ind) { ind.textContent = 'UPDATED'; setTimeout(() => { ind.textContent = ''; }, 2000); }
     } catch(err) { alert('Invalid JSON file.'); }
   };
   reader.readAsText(file);
