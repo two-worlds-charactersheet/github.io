@@ -63,7 +63,9 @@ body{background:#2a1f14;font-family:'Crimson Pro',Georgia,serif;color:var(--ink)
 .combat-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.12em;color:var(--ink-soft);opacity:0.7;margin-top:2px;display:block;}
 
 /* main three-column layout */
-.main-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:start;}
+.main-cols{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;align-items:stretch;}
+.main-cols>div{display:flex;flex-direction:column;}
+.main-cols>div #equip-block{flex:1;display:flex;flex-direction:column;justify-content:space-between;padding-bottom:2px;}
 
 /* hp + appearance left column */
 .hp-block{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;}
@@ -131,13 +133,13 @@ body{background:#2a1f14;font-family:'Crimson Pro',Georgia,serif;color:var(--ink)
 .sphere-pillar-tag{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.12em;color:var(--ink-soft);opacity:0.7;text-transform:uppercase;margin-left:auto;}
 .sphere-tier-select{background:transparent;border:1px solid var(--border);border-radius:2px;font-family:'Cinzel',serif;font-size:8px;color:var(--ink);padding:2px 4px;outline:none;cursor:pointer;}
 .sphere-body{padding:6px 10px;}
-.perk-row{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid rgba(90,65,40,0.08);}
+.perk-row{display:flex;align-items:center;gap:6px;margin-bottom:5px;padding-bottom:5px;border-bottom:1px solid rgba(90,65,40,0.08);}
 .perk-row:last-child{border-bottom:none;margin-bottom:0;padding-bottom:0;}
-.perk-type-tag{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.1em;color:var(--ink-soft);opacity:0.7;width:48px;flex-shrink:0;padding-top:2px;text-transform:uppercase;}
+.perk-type-tag{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.1em;color:var(--ink-soft);opacity:0.7;white-space:nowrap;flex-shrink:0;text-transform:uppercase;width:65px;border-right:1px solid var(--border-strong);padding-right:4px;}
 .perk-desc{flex:1;font-size:11px;color:var(--ink);background:transparent;border:none;border-bottom:1px dashed rgba(90,65,40,0.2);outline:none;font-family:'Crimson Pro',serif;line-height:1.4;resize:none;min-height:16px;overflow:hidden;}
 .rank-dots{display:flex;gap:3px;align-items:center;padding-top:2px;flex-shrink:0;}
 .rank-dot{width:8px;height:8px;border-radius:50%;border:1.5px solid var(--border-strong);cursor:pointer;transition:all 0.15s;}
-.rank-dot.filled{background:var(--gold);border-color:var(--gold);}
+.rank-dot.filled{background:var(--pillar-color,var(--gold));border-color:var(--pillar-color,var(--gold));}
 .rank-dot:hover{border-color:var(--gold);}
 .disc-row{display:flex;align-items:center;gap:6px;padding:4px 10px;background:rgba(184,134,11,0.06);border-top:1px solid var(--border);}
 .disc-label{font-family:'Cinzel',serif;font-size:7px;letter-spacing:0.12em;color:var(--gold);text-transform:uppercase;opacity:0.9;flex-shrink:0;}
@@ -895,7 +897,7 @@ function buildSkillsList(){
 }
 
 function buildEquipment(){
-  document.getElementById('equip-block').innerHTML=Array.from({length:20},(_,i)=>`
+  document.getElementById('equip-block').innerHTML=Array.from({length:22},(_,i)=>`
     <div class="equipment-row">
       <input class="equip-input" type="text" placeholder="Item ${i+1}">
       <input class="equip-qty" type="number" placeholder="qty">
@@ -904,7 +906,7 @@ function buildEquipment(){
 
 function buildSpheres(){
   document.getElementById('sphere-section').innerHTML=SPHERES.map((s,i)=>`
-    <div class="sphere-card">
+    <div class="sphere-card" style="--pillar-color:${s.color}">
       <div class="sphere-header">
         <div class="sphere-gem-dot gem-empty" id="sphere-gem-${i}"></div>
         <input class="sphere-name-input" type="text" placeholder="Sphere ${i+1} — not yet bonded">
